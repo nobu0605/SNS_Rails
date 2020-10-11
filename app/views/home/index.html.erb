@@ -1,13 +1,14 @@
 <% if user_signed_in? %> <!-- ユーザーがログインしているか調べる -->
   <!-- ユーザーがログインしていた時の処理 -->
-  <h2> 現在 <%= current_user.name %> さんがログインしています </h2> <!-- ここを追加します -->
-  <%= link_to "ログアウト", destroy_user_session_path, method: :delete %> <!-- ログアウトをする -->
-  <%= link_to "投稿する", new_post_path, class: 'post' %>
+  <h2> <%= current_user.name %> is logged in! </h2> <!-- ここを追加します -->
+  <h3> <%= current_user.email %></h3>
+  <%= link_to "Logout", destroy_user_session_path, method: :delete %> <!-- ログアウトをする -->
+  <%= link_to "New post", new_post_path, class: 'post' %>
 <% else %>
   <!-- ユーザーがログインしていなかった時の処理 -->
-  <h2> 現在ログインしていません </h2>
-  <%= link_to "ログイン", new_user_session_path, class: 'post' %> <!-- ログイン画面に移行する -->
-  <%= link_to "新規登録", new_user_registration_path, class: 'post' %> <!-- 新規登録画面に移行する -->
+  <h2> You haven't loged in yet. </h2>
+  <%= link_to "Login", new_user_session_path, class: 'post' %> <!-- ログイン画面に移行する -->
+  <%= link_to "Register", new_user_registration_path, class: 'post' %> <!-- 新規登録画面に移行する -->
 <% end %>
 
 <ul>
@@ -15,6 +16,25 @@
         <li>
             <%= link_to post.title, post_path(post.id) %>
             <%=post.content%>
+            <% if current_user != nil && current_user.already_liked?(post) %>
+              <%= link_to post_like_path(post.id,current_user.id), method: :delete do %>
+                  <i class="far fa-thumbs-down"></i>
+                  like(<%= post.liked_users.count %>)
+              <% end %>  
+            <% else %>
+            <%= link_to post_likes_path(post), method: :post do %>
+              <% if current_user != nil %>
+                <i class="far fa-thumbs-up"></i>
+              <% end %> 
+                like(<%= post.liked_users.count %>)
+            <% end %>  
+       
+            <% end %>
+            <p>Who liked</p>
+            <% post.liked_users.each do |user| %>
+              <p><%= user.name %></p>
+            <% end %>
+
             <%= link_to '[Edit]', edit_post_path(post), class: 'command' %>
             <%= link_to '[×]', 
             post_path(post), 
